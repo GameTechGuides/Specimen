@@ -160,7 +160,7 @@ This section provides comprehensive guidance on implementing and utilizing custo
 
 ### Defining Custom Game Options
 
-To define custom game options, you will need to create a new class that represents your custom options. This class should be static and contain public static fields or properties representing each option. Use the `ModOption` attribute to mark these fields or properties as custom game options.
+To define custom game options, you will need to create a new class that represents your custom options. This class should be static and contain public static fields or properties representing each option.
 
 Example:
 ```csharp
@@ -168,11 +168,7 @@ using AmongUsSpecimen.ModOptions;
 
 public static class MyCustomOptions
 {
-    [ModOption("CustomBoolOption")]
-    public static bool CustomBoolOption = true;
-
-    [ModOption("CustomIntOption")]
-    public static int CustomIntOption = 10;
+    var tab = new ModOptionTab("Example", "Example", Sprite); //Make sure the sprite exsit for no null references
 }
 ```
 
