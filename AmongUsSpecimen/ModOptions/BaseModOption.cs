@@ -12,19 +12,31 @@ namespace AmongUsSpecimen.ModOptions;
 
 public abstract class BaseModOption
 {
+    // Unique identifier for the option
     public int Id { get; }
+    // Type of the option (e.g., boolean, float, string)
     public OptionType Type { get; }
+    // Tab under which the option is categorized
     public ModOptionTab Tab { get; private init; }
+    // Display name of the option
     public string Name { get; }
+    // Controller for available selections for the option
     protected SelectionsController AvailableSelections { get; init; }
+    // Default selection index
     public int DefaultSelection { get; protected init; }
+    // Current selection index
     protected int _currentSelection { get; set; }
 
+    // Restriction level of the option (public, private, local)
     public OptionRestriction Restriction { get; private set; } = OptionRestriction.Public;
+    // Location where the option's value is saved (preset, local, global)
     public OptionSaveLocation SaveLocation { get; private set; } = OptionSaveLocation.Preset;
+    // Determines if the option is enabled when its parent is disabled
     public bool EnabledIfParentDisabled { get; private set; }
+    // Action triggered on UI label click
     internal Action OnUiLabelClick { get; set; }
 
+    // Updates the UI and behavior based on the current selection
     public void Update()
     {
         try
@@ -37,6 +49,7 @@ public abstract class BaseModOption
         }
     }
 
+    // Sets the restriction level for the option
     public BaseModOption SetRestriction(OptionRestriction restriction = OptionRestriction.Public)
     {
         Restriction = restriction;
@@ -44,6 +57,7 @@ public abstract class BaseModOption
         return this;
     }
 
+    // Sets the save location for the option's value
     public BaseModOption SetSaveLocation(OptionSaveLocation location = OptionSaveLocation.Preset)
     {
         SaveLocation = location;
@@ -52,6 +66,7 @@ public abstract class BaseModOption
         return this;
     }
 
+    // Sets whether the option is enabled if its parent is disabled
     public BaseModOption SetEnabledIfParentDisabled(bool value = false)
     {
         EnabledIfParentDisabled = value;
@@ -59,6 +74,7 @@ public abstract class BaseModOption
         return this;
     }
 
+    // Sets whether the option is a header
     public BaseModOption SetIsHeader(bool? value = null)
     {
         if (!value.HasValue)
@@ -74,6 +90,7 @@ public abstract class BaseModOption
         return this;
     }
 
+    // Gets or sets the current selection index, saving the option if necessary
     public int CurrentSelection
     {
         get => _currentSelection;
@@ -83,6 +100,7 @@ public abstract class BaseModOption
     internal const float BaseOptionYOffset = 0.5f;
     internal const float AdditionalHeaderYOffset = 0.25f;
 
+    // Updates the behavior of the option based on its type and current state
     internal void BehaviourUpdate()
     {
         if (!OptionBehaviour) return;
@@ -104,6 +122,7 @@ public abstract class BaseModOption
         OptionBehaviour.gameObject.SetActive(enabled);
     }
 
+    // Sets the current selection index and updates the option accordingly
     internal void SetCurrentSelection(int value, bool updatePreset = true)
     {
         var min = AvailableSelections.MinSelection;
@@ -127,19 +146,28 @@ public abstract class BaseModOption
         ValueChanged?.Invoke();
     }
 
+    // Parent option, if any
     public BaseModOption Parent { get; }
+    // The actual UI component representing the option
     internal OptionBehaviour OptionBehaviour { get; set; }
+    // Custom UI option component
     internal UiCustomOption UiOption { get; set; }
+    // Indicates if the option serves as a header
     public bool IsHeader { get; private set; }
+    // Determines if the option is enabled based on its current selection and parent's state
     internal bool IsEnabled => CurrentSelection > 0 && IsParentEnabled;
 
+    // Determines if the parent option is enabled
     internal bool IsParentEnabled => Parent == null || (!EnabledIfParentDisabled && Parent.IsEnabled) ||
                                      (EnabledIfParentDisabled && !Parent.IsEnabled && Parent.IsParentEnabled);
 
+    // Children options of this option
     internal IEnumerable<BaseModOption> Children => ModOptionManager.Options.Where(x => x.Parent == this);
 
+    // Generates a unique name for the option based on its tab and parent
     private string UniqueName => $"{Tab.Key}:" + Name + (Parent == null ? string.Empty : $":{Parent.UniqueName}");
 
+    // Constructor initializing the option with its basic properties
     protected BaseModOption(OptionType type, ModOptionTab tab, string name, BaseModOption parent = null)
     {
         Tab = tab;
@@ -151,6 +179,7 @@ public abstract class BaseModOption
         IsHeader = Parent == null;
     }
 
+    // Saves the current selection of the option based on its save location
     private void SaveOption()
     {
         switch (SaveLocation)
@@ -170,6 +199,7 @@ public abstract class BaseModOption
         OptionStorage.SaveCurrentPreset();
     }
 
+    // Retrieves the current selection from storage based on the save location
     protected int GetStorageSelection()
     {
         switch (SaveLocation)
@@ -185,6 +215,7 @@ public abstract class BaseModOption
         return DefaultSelection;
     }
 
+    // Generates a hash code for the option based on its unique name
     private readonly SHA1 hash = SHA1.Create();
 
     private int GetInt32HashCode(string strText)
@@ -199,6 +230,7 @@ public abstract class BaseModOption
         return int.MaxValue - hashCode;
     }
 
+    // Calculates the indentation level for the UI display based on the option's hierarchy
     internal int GetUiIndentation()
     {
         var i = 0;
@@ -216,6 +248,7 @@ public abstract class BaseModOption
         return i;
     }
 
+    // Generates the display name for the option, including indentation for hierarchy
     internal string GetDisplayName(int prefixSize = 1)
     {
         const string blankChar = "H";
@@ -230,12 +263,17 @@ public abstract class BaseModOption
         return $"<size={prefixSize}>{ColorHelpers.Colorize(UIPalette.Transparent, prefix)}</size>{Name}";
     }
 
+    // Display name of the option, including any UI-specific formatting
     public virtual string DisplayName => GetDisplayName();
+    // Display value of the option for UI purposes
     public virtual string DisplayValue => AvailableSelections.GetValue(CurrentSelection);
+    // Display value of the option for UI purposes, potentially with different formatting
     public virtual string DisplayUiValue => AvailableSelections.GetValue(CurrentSelection);
 
+    // Event triggered when the option's value changes
     public event Action ValueChanged;
 
+    // Helper methods for retrieving the option's value in various formats
     public bool GetBool() => IsEnabled;
     public string GetString() => AvailableSelections.GetValue(CurrentSelection);
     public float GetFloat() => float.Parse(GetString());

@@ -197,3 +197,5 @@ if (MyCustomOptions.CustomBoolOption)
 By following these guidelines, you can easily add custom game options to your Among Us mod using the Specimen framework.
 
 *This mod is not affiliated with Among Us or Innersloth LLC, and the content contained therein is not endorsed or otherwise sponsored by Innersloth LLC. Portions of the materials contained herein are property of Innersloth LLC. © Innersloth LLC.*
+
+**Note:** It's important to include inline comments in your code to explain the purpose and usage of your methods and classes. This practice enhances code readability and maintenance.
